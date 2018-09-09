@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<menu>
+  <item>
+    <path>civicrm/jira-connect/config</path>
+    <page_callback>CRM_JiraConnect_Form_JiraSettings</page_callback>
+    <title>JiraSettings</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/jira-connect/connection</path>
+    <page_callback>CRM_JiraConnect_Page_JiraSettings</page_callback>
+    <title>JiraSettings</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/jira-connect/oauth-callback</path>
+    <page_callback>CRM_JiraConnect_Page_OAuthCallback</page_callback>
+    <title>OAuthCallback</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+</menu>

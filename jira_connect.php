@@ -2,6 +2,7 @@
 
 require_once 'jira_connect.civix.php';
 use CRM_JiraConnect_ExtensionUtil as E;
+require_once 'CRM_JiraConnect_JiraApiHelper.php';
 
 /**
  * Implements hook_civicrm_config().

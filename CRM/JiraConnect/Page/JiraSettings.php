@@ -14,11 +14,11 @@ class CRM_JiraConnect_Page_JiraSettings extends CRM_Core_Page {
     $this->assign('connected', $connected);
     if($connected) {
     } else {
-      $state = '1234'; //TODO: generate this
-      $redirect_url= urlencode(CRM_Utils_System::url('civicrm/jira-connect/oauth-callback', 'reset=1', TRUE, NULL, FALSE, TRUE));
+      $state = CRM_JiraConnect_JiraApiHelper::newStateKey();
+      $redirect_url= CRM_JiraConnect_JiraApiHelper::generateRedirectUrlEncoded();
       $this->assign(
         'oauth_url',
-        'https://accounts.atlassian.com/authorize?audience=api.atlassian.com&client_id=' . $client_id . '&scope=manage:jira-configuration&redirect_uri=' . $redirect_url . '&state=' . $state . '&response_type=code&prompt=consent'
+        'https://accounts.atlassian.com/authorize?audience=api.atlassian.com&client_id=' . $client_id . '&scope=manage:jira-configuration%20offline_access&redirect_uri=' . $redirect_url . '&state=' . $state . '&response_type=code&prompt=consent'
       );
     }
     // Example: Assign a variable for use in a template

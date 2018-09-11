@@ -66,6 +66,7 @@ class CRM_JiraConnect_JiraApiHelper {
       CURLOPT_HTTPHEADER => array(
         'Content-Type: application/json'
       ),
+      // the token endpoint requires a user agent
       CURLOPT_USERAGENT => 'curl/7.55.1',
       CURLOPT_POSTFIELDS => $postBody
     ));
@@ -81,8 +82,21 @@ class CRM_JiraConnect_JiraApiHelper {
         echo "<br/><br/>Error\n\n";
         echo $response_json["error_description"];
       } else {
-        Civi::settings()->set("jira connected", true);
         self::parseOAuthTokenResponse($response_json);
+        // get the cloud id
+        $ids = self::retrieveJiraCloudId();
+        if(count($ids) > 1) {
+          //TODO: handle multiple ids
+          echo "Too many ids";
+          die();
+        } else if(count($ids) == 1) {
+          Civi::settings()->set("jira_cloud_id", $ids[0]);
+          Civi::settings()->set("jira connected", true);
+        } else {
+          //TODO: handle this
+          echo "request failed";
+          die();
+        }
         $return_path = CRM_Utils_System::url('civicrm/jira-connect/connection', 'reset=1', TRUE, NULL, FALSE, FALSE);
         header("Location: " . $return_path);
         die();
@@ -129,11 +143,49 @@ class CRM_JiraConnect_JiraApiHelper {
    * refreshes the token if it has expired
    * @param $curl_request
    */
-  private static function addAccessToken($curl_request) {
+  private static function addAccessToken(&$curl_request) {
     // TODO: check expiry and refresh
-    curl_setopt(CURLOPT_HTTPHEADER, 'Authorization Bearer');
+    curl_setopt(
+      $curl_request,
+      CURLOPT_HTTPHEADER,
+      array(
+        'Authorization: Bearer ' . Civi::settings()->get('jira_token'),
+        'Accept: application/json'
+      )
+    );
+
   }
 
+  /**
+   * Retrieves the jira cloud ids for our current token from the api
+   *
+   * @return array
+   */
+  private static function retrieveJiraCloudId() {
 
+    $ch = curl_init( 'https://api.atlassian.com/oauth/token/accessible-resources');
+//    $ch = curl_init( 'http://localhost:1500');
+    curl_setopt_array($ch, array(
+      CURLOPT_GET => TRUE,
+      CURLOPT_RETURNTRANSFER => TRUE,
+      CURLOPT_USERAGENT => 'curl/7.55.1',
+    ));
+    self::addAccessToken($ch);
+
+    $response = curl_exec($ch);
+    if(curl_errno($ch)) {
+      echo 'Request Error:' . curl_error($ch);
+      return [];
+      // TODO: handle this better
+    } else {
+      echo $response;
+      $response_json = json_decode($response, true);
+      $ids = array();
+      foreach ($response_json as $domain) {
+        $ids[] = $domain['id'];
+      }
+      return $ids;
+    }
+  }
 
 }

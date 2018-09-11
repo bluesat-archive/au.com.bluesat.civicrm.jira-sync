@@ -113,6 +113,20 @@ return array(
     'help_text' => '',
     'default' => false,
   ),
+  'jira_cloud_id' => array(
+    'group_name' => 'Jira Token Control',
+    'group' => 'jira_token',
+    'name' => 'jira_cloud_id',
+    'type' => 'String',
+    'add' => '4.4',
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => 'Jira "cloudid" for the domain we are connected to',
+    'title' => 'JIRA CloudID',
+    'help_text' => '',
+    'default' => false,
+  ),
+
 
 )
 

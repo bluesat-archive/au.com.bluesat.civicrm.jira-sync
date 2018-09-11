@@ -36,6 +36,12 @@ class CRM_JiraConnect_JiraApiHelper {
     return $actualValue == $stateKey;
   }
 
+  /**
+   * Performs an oauth authorization code grant exchange.
+   * Redirects back if successful.
+   *
+   * @param $code the code to use for the exchange
+   */
   public static function doOAuthCodeExchange($code) {
     $client_id = Civi::settings()->get('jira_client_id');
     $client_secret = Civi::settings()->get('jira_secret');
@@ -48,33 +54,53 @@ class CRM_JiraConnect_JiraApiHelper {
       'grant_type' => 'authorization_code',
       'code' => $code
     );
-    print_r($requestJsonDict);
-    $postBody = json_encode($requestJsonDict);
+    $postBody = json_encode($requestJsonDict, JSON_UNESCAPED_SLASHES);
     print $postBody;
 
     // make a request
     $ch = curl_init(self::TOKEN_URL);
+//    $ch = curl_init('http://localhost:1500');
     curl_setopt_array($ch, array(
       CURLOPT_POST => TRUE,
       CURLOPT_RETURNTRANSFER => TRUE,
       CURLOPT_HTTPHEADER => array(
         'Content-Type: application/json'
       ),
+      CURLOPT_USERAGENT => 'curl/7.55.1',
       CURLOPT_POSTFIELDS => $postBody
     ));
 //    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:'));
-    print $ch;
-    print_r($ch);
     $response = curl_exec($ch);
     if(curl_errno($ch)) {
       echo 'Request Error:' . curl_error($ch);
+      // TODO: handle this better
+    } else {
+      $response_json = json_decode($response, true);
+      if(in_array("error", $response_json)) {
+        // TODO: handle this better
+        echo "<br/><br/>Error\n\n";
+        echo $response_json["error_description"];
+      } else {
+        Civi::settings()->set("jira connected", true);
+        self::parseOAuthTokenResponse($response_json);
+        $return_path = CRM_Utils_System::url('civicrm/jira-connect/connection', 'reset=1', TRUE, NULL, FALSE, FALSE);
+        header("Location: " . $return_path);
+        die();
+      }
     }
-    print_r($response);
 
-//    $response = http_post_data(self::TOKEN_URL, $postBody);
-//    print_r($response);
+  }
 
-
+  /**
+   * Parse a standard oauth token response and store in settings.
+   * Does not handle error conditions.
+   * @param $response_json array
+   */
+  public static function parseOAuthTokenResponse($response_json) {
+    // for now just store the tokens
+    Civi::settings()->set("jira_token", $response_json["access_token"]);
+    Civi::settings()->set("jira_refresh", $response_json["refresh_token"]);
+    Civi::settings()->set("jira_expiry", time() + $response_json["refresh_token"]);
   }
 
   /**
@@ -96,6 +122,18 @@ class CRM_JiraConnect_JiraApiHelper {
     $redirect_url = CRM_Utils_System::url('civicrm/jira-connect/oauth-callback', 'reset=1', TRUE, NULL, FALSE, TRUE);
     return $redirect_url;
   }
+
+  /**
+   * Adds the access token to a curl request
+   *
+   * refreshes the token if it has expired
+   * @param $curl_request
+   */
+  private static function addAccessToken($curl_request) {
+    // TODO: check expiry and refresh
+    curl_setopt(CURLOPT_HTTPHEADER, 'Authorization Bearer');
+  }
+
 
 
 }

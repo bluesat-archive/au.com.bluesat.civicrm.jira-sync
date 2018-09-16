@@ -3,37 +3,17 @@
  * Helper Functions for the JIRA Api
  */
 
+
 class CRM_JiraConnect_JiraApiHelper {
 
   const TOKEN_URL = 'https://accounts.atlassian.com/oauth/token';
 
-  /**
-   * Generate a new state key for oauth, store it in the settings
-   *
-   * @return string
-   *  Ex: 1234
-   */
-  public static function newStateKey() {
-    $stateKey = uniqid("", true);
-
-    Civi::settings()->set('jira_oauth_state', $stateKey);
-
-    return $stateKey;
-  }
-
-  /**
-   * Check if the state key is valid by comparing it against our stored value
-   *
-   * @param $stateKey string
-   *  Ex: 123123123
-   * @return bool
-   */
-  public static function verifyState($stateKey) {
-
-    $actualValue = Civi::settings()->get('jira_oauth_state');
-
-    // are they equal
-    return $actualValue == $stateKey;
+  public static function oauthHelper() {
+    static $oauthHelperObj = null;
+    if($oauthHelperObj == null) {
+      $oauthHelperObj = new CRM_OauthSync_OAuthHelper("jira", self::TOKEN_URL);
+    }
+    return $oauthHelperObj;
   }
 
   /**
@@ -105,83 +85,47 @@ class CRM_JiraConnect_JiraApiHelper {
 
   }
 
-  /**
-   * Parse a standard oauth token response and store in settings.
-   * Does not handle error conditions.
-   * @param $response_json array
-   */
-  public static function parseOAuthTokenResponse($response_json) {
-    // for now just store the tokens
-    Civi::settings()->set("jira_token", $response_json["access_token"]);
-    Civi::settings()->set("jira_refresh", $response_json["refresh_token"]);
-    Civi::settings()->set("jira_expiry", time() + $response_json["refresh_token"]);
-  }
-
-  /**
-   * Generates a urlencoded oauth redirect url for the app
-   *
-   * @return string
-   */
-  public static function generateRedirectUrlEncoded() {
-    $redirect_url = urlencode(CRM_Utils_System::url('civicrm/jira-connect/oauth-callback', 'reset=1', TRUE, NULL, FALSE, TRUE));
-    return $redirect_url;
-  }
-
-  /**
-   * Generates a oauth redirect url for the app
-   *
-   * @return string
-   */
-  public static function generateRedirectUrl() {
-    $redirect_url = CRM_Utils_System::url('civicrm/jira-connect/oauth-callback', 'reset=1', TRUE, NULL, FALSE, TRUE);
-    return $redirect_url;
-  }
-
-  /**
-   * Adds the access token to a curl request
-   *
-   * refreshes the token if it has expired
-   * @param $curl_request
-   */
-  private static function addAccessToken(&$curl_request) {
-    // TODO: check expiry and refresh
-    curl_setopt(
-      $curl_request,
-      CURLOPT_HTTPHEADER,
-      array(
-        'Authorization: Bearer ' . Civi::settings()->get('jira_token'),
-        'Accept: application/json'
-      )
-    );
-
-  }
 
   /**
    * Retrieves the jira cloud ids for our current token from the api
    *
    * @return array
    */
-  private static function retrieveJiraCloudId() {
+  public static function retrieveJiraCloudId() {
 
     $ch = curl_init( 'https://api.atlassian.com/oauth/token/accessible-resources');
 //    $ch = curl_init( 'http://localhost:1500');
     curl_setopt_array($ch, array(
-      CURLOPT_GET => TRUE,
       CURLOPT_RETURNTRANSFER => TRUE,
-      CURLOPT_USERAGENT => 'curl/7.55.1',
     ));
-    self::addAccessToken($ch);
+    self::oauthHelper()->addAccessToken($ch);
 
+    print("<br/>connecting\n\n<br/>");
     $response = curl_exec($ch);
-    if(curl_errno($ch)) {
+    print("<br/>response\n\n<br/>");
+    print_r($response);
+    print("<br/>response\n\n<br/>");
+    print "-" . $response . "-";
+    print("\n\n<br/>");
+    print curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    print("\n\n<br/>");
+    if(curl_errno($ch) || curl_getinfo($ch, CURLINFO_HTTP_CODE) != 200) {
       echo 'Request Error:' . curl_error($ch);
       return [];
       // TODO: handle this better
     } else {
-      echo $response;
-      $response_json = json_decode($response, true);
+      $response_json = json_decode($response, true);//, true);
+      print json_last_error();
+      print json_last_error_msg();
+      print("\n\n<br/>");
+      print_r($response_json);
       $ids = array();
+      print("\n\n<br/>");
+      print_r($response_json[0]);
+      print("\n\n<br/>");
+      print_r($response);
       foreach ($response_json as $domain) {
+        print_r($domain);
         $ids[] = $domain['id'];
       }
       return $ids;
@@ -189,3 +133,8 @@ class CRM_JiraConnect_JiraApiHelper {
   }
 
 }
+
+//require_once CRM_Extension_System::singleton()->getMapper()->classToPath('CRM_OauthSync_OAuthHelper');
+require_once CRM_Extension_System::singleton()->getMapper()->keyToPath('com.hjed.civicrm.oauth-sync');
+CRM_JiraConnect_JiraApiHelper::oauthHelper();
+

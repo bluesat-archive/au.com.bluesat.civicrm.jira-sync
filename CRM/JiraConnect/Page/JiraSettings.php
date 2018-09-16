@@ -14,8 +14,11 @@ class CRM_JiraConnect_Page_JiraSettings extends CRM_Core_Page {
     $this->assign('connected', $connected);
     if($connected) {
     } else {
-      $state = CRM_JiraConnect_JiraApiHelper::newStateKey();
-      $redirect_url= CRM_JiraConnect_JiraApiHelper::generateRedirectUrlEncoded();
+      $state = CRM_JiraConnect_JiraApiHelper::oauthHelper()->newStateKey();
+      $redirect_url= CRM_OauthSync_OAuthHelper::generateRedirectUrlEncoded();
+      CRM_JiraConnect_JiraApiHelper::oauthHelper()->setOauthCallbackReturnPath(
+        join('/', $this->urlPath)
+      );
       $this->assign(
         'oauth_url',
         'https://accounts.atlassian.com/authorize?audience=api.atlassian.com&client_id=' . $client_id . '&scope=manage:jira-configuration%20offline_access&redirect_uri=' . $redirect_url . '&state=' . $state . '&response_type=code&prompt=consent'

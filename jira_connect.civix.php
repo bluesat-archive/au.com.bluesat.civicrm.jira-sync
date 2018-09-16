@@ -8,7 +8,7 @@
  */
 class CRM_JiraConnect_ExtensionUtil {
   const SHORT_NAME = "jira_connect";
-  const LONG_NAME = "com.hjed.jira-connect";
+  const LONG_NAME = "com.hjed.civicrm.jira-connect";
   const CLASS_PREFIX = "CRM_JiraConnect";
 
   /**

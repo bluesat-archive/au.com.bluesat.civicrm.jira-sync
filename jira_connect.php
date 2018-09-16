@@ -138,13 +138,34 @@ function jira_connect_civicrm_entityTypes(&$entityTypes) {
 // --- Functions below this ship commented out. Uncomment as required. ---
 
 /**
- * Implements hook_civicrm_preProcess().
+ * Implements hook_civicrm_pageRun().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_preProcess
- *
-function jira_connect_civicrm_preProcess($formName, &$form) {
+ */
+function jira_connect_civicrm_pageRun(&$run) {
+}
 
-} // */
+
+/**
+ * Implements hook_civicrm_oauthsync_consent_success().
+ *
+ * Used to get the connection id
+ */
+function jira_connect_civicrm_oauthsync_consent_success(&$prefix) {
+
+  $ids = CRM_JiraConnect_JiraApiHelper::retrieveJiraCloudId();
+  if(count($ids) > 1) {
+    //TODO: handle multiple ids
+    echo "Too many ids";
+    die();
+  } else if(count($ids) == 1) {
+    Civi::settings()->set("jira_cloud_id", $ids[0]);
+  } else {
+    //TODO: handle this
+    echo "request failed";
+    die();
+  }
+}
 
 /**
  * Implements hook_civicrm_navigationMenu().

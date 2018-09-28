@@ -4,9 +4,10 @@
  */
 
 
-class CRM_JiraConnect_JiraApiHelper {
+class CRM_JiraSync_JiraApiHelper {
 
   const TOKEN_URL = 'https://accounts.atlassian.com/oauth/token';
+  const JIRA_REST_API_BASE = "https://api.atlassian.com/ex/jira/";
 
   public static function oauthHelper() {
     static $oauthHelperObj = null;
@@ -77,7 +78,7 @@ class CRM_JiraConnect_JiraApiHelper {
           echo "request failed";
           die();
         }
-        $return_path = CRM_Utils_System::url('civicrm/jira-connect/connection', 'reset=1', TRUE, NULL, FALSE, FALSE);
+        $return_path = CRM_Utils_System::url('civicrm/jira-sync/connection', 'reset=1', TRUE, NULL, FALSE, FALSE);
         header("Location: " . $return_path);
         die();
       }
@@ -132,9 +133,55 @@ class CRM_JiraConnect_JiraApiHelper {
     }
   }
 
+
+  /**
+   * Call a JIRA api endpoint
+   *
+   * @param string $path the path after the jira base url
+   * @param bool $get if this is a get request
+   * @param bool $post if this is a post request
+   *  Ex. /rest/api/3/groups/picker
+   *
+   * @return array | CRM_Core_Error
+   */
+  public static function callJiraApi($path, $get = true, $post = false) {
+    assert($get != $post);
+
+    // build the url
+    $url = self::JIRA_REST_API_BASE .
+      Civi::settings()->get("jira_cloud_id") .
+      '/' .
+      $path;
+
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, array(
+      CURLOPT_RETURNTRANSFER => TRUE,
+      CURLOPT_POST => $post,
+      CURLOPT_HTTPGET => $get,
+    ));
+    self::oauthHelper()->addAccessToken($ch);
+
+    print("<br/>connecting\n\n<br/>");
+    $response = curl_exec($ch);
+    print("<br/>response\n\n<br/>");
+    print_r($response);
+    print("<br/>response\n\n<br/>");
+    print "-" . $response . "-";
+    print("\n\n<br/>");
+    print curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    print("\n\n<br/>");
+    if (curl_errno($ch) || curl_getinfo($ch, CURLINFO_HTTP_CODE) != 200) {
+      echo 'Request Error:' . curl_error($ch);
+      return CRM_Core_Error::createError("Failed to access jira API");
+      // TODO: handle this better
+    } else {
+      return json_decode($response, true);
+    }
+  }
 }
 
 //require_once CRM_Extension_System::singleton()->getMapper()->classToPath('CRM_OauthSync_OAuthHelper');
 require_once CRM_Extension_System::singleton()->getMapper()->keyToPath('com.hjed.civicrm.oauth-sync');
-CRM_JiraConnect_JiraApiHelper::oauthHelper();
+CRM_JiraSync_JiraApiHelper::oauthHelper();
 

@@ -1,12 +1,12 @@
 <?php
 
 // AUTO-GENERATED FILE -- Civix may overwrite any changes made to this file
-use CRM_JiraConnect_ExtensionUtil as E;
+use CRM_JiraSync_ExtensionUtil as E;
 
 /**
  * Base class which provides helpers to execute upgrade logic
  */
-class CRM_JiraConnect_Upgrader_Base {
+class CRM_JiraSync_Upgrader_Base {
 
   /**
    * @var varies, subclass of this
@@ -45,8 +45,8 @@ class CRM_JiraConnect_Upgrader_Base {
   static public function instance() {
     if (!self::$instance) {
       // FIXME auto-generate
-      self::$instance = new CRM_JiraConnect_Upgrader(
-        'com.hjed.civicrm.jira-connect',
+      self::$instance = new CRM_JiraSync_Upgrader(
+        'com.hjed.civicrm.jira-sync',
         realpath(__DIR__ . '/../../../')
       );
     }
@@ -60,7 +60,7 @@ class CRM_JiraConnect_Upgrader_Base {
    * task-context; otherwise, this will be non-reentrant.
    *
    * @code
-   * CRM_JiraConnect_Upgrader_Base::_queueAdapter($ctx, 'methodName', 'arg1', 'arg2');
+   * CRM_JiraSync_Upgrader_Base::_queueAdapter($ctx, 'methodName', 'arg1', 'arg2');
    * @endcode
    */
   static public function _queueAdapter() {

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<extension key="com.hjed.civicrm.jira-connect" type="module">
-  <file>jira_connect</file>
-  <name>FIXME</name>
-  <description>FIXME</description>
+<extension key="com.hjed.civicrm.jira-sync" type="module">
+  <file>jira_sync</file>
+  <name>JIRA Group Sync</name>
+  <description>This plugin provides basic sync capabilities between civicrm and jira</description>
   <license>AGPL-3.0</license>
   <maintainer>
     <author>Harry J.E Day</author>
@@ -25,6 +25,6 @@
   </compatibility>
   <comments>This is a new, undeveloped module</comments>
   <civix>
-    <namespace>CRM/JiraConnect</namespace>
+    <namespace>CRM/JiraSync</namespace>
   </civix>
 </extension>

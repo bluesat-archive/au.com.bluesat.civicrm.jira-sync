@@ -1,15 +1,17 @@
-# com.hjed.civicrm.jira-connect
+# com.hjed.civicrm.jira-sync
 
-![Screenshot](/images/screenshot.png)
+This extension will provide two way sync of groups between CiviCRM and JIRA Cloud. 
 
-(*FIXME: In one or two paragraphs, describe what the extension does and why one would download it. *)
+This plugin is being developed for [BLUEsat UNSW](http://bluesat.com.au).
+
 
 The extension is licensed under [AGPL-3.0](LICENSE.txt).
 
 ## Requirements
 
 * PHP v5.4+
-* CiviCRM (*FIXME: Version number*)
+* CiviCRM 4.7
+* com.hjed.civicrm.oauth-sync
 
 ## Installation (Web UI)
 
@@ -22,7 +24,7 @@ install it with the command-line tool [cv](https://github.com/civicrm/cv).
 
 ```bash
 cd <extension-dir>
-cv dl com.hjed.civicrm.jira-connect@https://github.com/FIXME/com.hjed.civicrm.jira-connect/archive/master.zip
+cv dl com.hjed.civicrm.jira-sync@https://github.com/FIXME/com.hjed.civicrm.jira-sync/archive/master.zip
 ```
 
 ## Installation (CLI, Git)
@@ -31,8 +33,8 @@ Sysadmins and developers may clone the [Git](https://en.wikipedia.org/wiki/Git) 
 install it with the command-line tool [cv](https://github.com/civicrm/cv).
 
 ```bash
-git clone https://github.com/FIXME/com.hjed.civicrm.jira-connect.git
-cv en jira_connect
+git clone https://github.com/FIXME/com.hjed.civicrm.jira-sync.git
+cv en jira_sync
 ```
 
 ## Usage

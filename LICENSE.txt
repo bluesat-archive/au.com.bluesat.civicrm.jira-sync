@@ -1,4 +1,4 @@
-Package: com.hjed.civicrm.jira-connect
+Package: com.hjed.civicrm.jira-sync
 Copyright (C) 2018, Harry J.E Day <harry@dayfamilyweb.com>
 Licensed under the GNU Affero Public License 3.0 (below).
 

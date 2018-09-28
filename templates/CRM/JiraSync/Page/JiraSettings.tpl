@@ -3,6 +3,7 @@
 
 {if $connected}
     <p>You are connected!</p>
+    <p><a href="{$oauth_url}">Connect</a></p>
     <!-- TODO: disconnect -->
 {else}
     <p>Please authorise a JIRA instance</p>

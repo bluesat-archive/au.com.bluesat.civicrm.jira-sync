@@ -1,10 +1,10 @@
 <?php
-use CRM_JiraConnect_ExtensionUtil as E;
+use CRM_JiraSync_ExtensionUtil as E;
 
 /**
  * Collection of upgrade steps.
  */
-class CRM_JiraConnect_Upgrader extends CRM_JiraConnect_Upgrader_Base {
+class CRM_JiraSync_Upgrader extends CRM_JiraSync_Upgrader_Base {
 
   // By convention, functions that look like "function upgrade_NNNN()" are
   // upgrade tasks. They are executed in order (like Drupal's hook_update_N).

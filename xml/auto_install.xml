@@ -22,10 +22,10 @@
   </CustomGroups>
   <CustomFields>
     <CustomField>
-      <name>JIRA_Groups</name>
+      <name>jira_sync_settings</name>
       <label>JIRA Groups</label>
       <data_type>String</data_type>
-      <html_type>Multi-Select</html_type>
+      <html_type>Select</html_type>
       <is_required>0</is_required>
       <is_searchable>0</is_searchable>
       <is_search_range>0</is_search_range>

@@ -194,28 +194,22 @@ function jira_sync_civicrm_oauthsync_jira_get_remote_user_list(&$remoteGroupName
   print_r($groups_json);
   print "\n<br/>";
   foreach ($groups_json['values'] as $user) {
-    // we match on email addresses
-    $contact = CRM_Contact_BAO_Contact::matchContactOnEmail($user['emailAddress']);
-    if($contact == null) {
-      //guess the name based on the split
-      $name_words = explode(" ",  $user["name"]);
-
-
-      $params = array(
-        'contact_type' => 'Individual',
-        'nick_name' => $user['displayName'],
-        'first_name' => $name_words[0],
-        'last_name' => $name_words[-1],
-        'email' => $user['email']
-      );
-      $contact = CRM_Contact_BAO_Contact::create(
-          $params
-      );
-    }
-    $members[] = $contact->id;
+    $members[] = CRM_JiraSync_JiraApiHelper::findOrCreateContact($user);
   }
 
   print_r($members);
+}
+
+/**
+ *
+ * Implements hook_civicrm_oauthsync_jira_update_remote_users().
+ *
+ * Used to sync the members of a remote group
+ */
+function jira_sync_civicrm_oauthsync_jira_update_remote_users(&$remoteGroupName, &$toRemove, &$toAdd) {
+  $groups_json = CRM_JiraSync_JiraApiHelper::callJiraApi('/rest/api/3/group/member?groupname=' . $remoteGroupName);
+  // TODO: handle the above being an error
+
 }
 
 /**

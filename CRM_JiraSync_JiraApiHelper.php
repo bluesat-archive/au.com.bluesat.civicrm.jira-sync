@@ -179,6 +179,61 @@ class CRM_JiraSync_JiraApiHelper {
       return json_decode($response, true);
     }
   }
+
+  /**
+   * Retrieve the id of the custom field "jira_user_key"
+   * @return int|null|string
+   * @throws CiviCRM_API3_Exception
+   */
+  private static function getJiraUserAccountCustomFieldId() {
+    return CRM_Core_BAO_CustomField::getCustomFieldID("jira_account_id", "jira_user_details");
+  }
+
+  /**
+   * Retrieve the id of the custom field "jira_user_key"
+   * @return int|null|string
+   * @throws CiviCRM_API3_Exception
+   */
+  private static function getJiraEmailAddressCustomFieldId() {
+    return CRM_Core_BAO_CustomField::getCustomFieldID("jira_email_address", "jira_user_details");
+  }
+
+  /**
+   * Finds a contact for given jira user object. If the contact
+   * does not exist this will create it.
+   * @param array $jiraUserObj the jira api array representing a user
+   * @return int the contact id
+   */
+  public static function findOrCreateContact($jiraUserObj) {
+    $contact = CRM_Contact_BAO_Contact::matchContactOnEmail($jiraUserObj['emailAddress']);
+    if($contact == null) {
+      //guess the name based on the split
+      $name_words = explode(" ",  $jiraUserObj["name"]);
+
+      $params = array(
+        'contact_type' => 'Individual',
+        'nick_name' => $jiraUserObj['displayName'],
+        'first_name' => $name_words[0],
+        'last_name' => $name_words[-1],
+        'email' => $jiraUserObj['email']
+      );
+      $contact = CRM_Contact_BAO_Contact::create(
+        $params
+      );
+    }
+    $params = array(
+      'entityID' => $contact->id,
+      self::getJiraUserAccountCustomFieldId() => $jiraUserObj['accountId']
+    );
+    CRM_Core_BAO_CustomValueTable::setValues($params);
+    $params = array(
+      'entityID' => $contact->id,
+      self::getJiraEmailAddressCustomFieldId() => $jiraUserObj['email']
+    );
+    CRM_Core_BAO_CustomValueTable::setValues($params);
+
+    return $contact->id;
+  }
 }
 
 //require_once CRM_Extension_System::singleton()->getMapper()->classToPath('CRM_OauthSync_OAuthHelper');

@@ -188,12 +188,12 @@ function jira_sync_civicrm_oauthsync_jira_sync_groups_list(&$groups) {
  * Used to sync the members of a remote group
  */
 function jira_sync_civicrm_oauthsync_jira_get_remote_user_list(&$remoteGroupName, &$members) {
-  $groups_json = CRM_JiraSync_JiraApiHelper::callJiraApi('/rest/api/3/group/member?groupname=' . $remoteGroupName);
+  $groupsJson = CRM_JiraSync_JiraApiHelper::callJiraApi('/rest/api/3/group/member?groupname=' . $remoteGroupName);
   // TODO: handle the above being an error
 
-  print_r($groups_json);
+  print_r($groupsJson);
   print "\n<br/>";
-  foreach ($groups_json['values'] as $user) {
+  foreach ($groupsJson['values'] as $user) {
     $members[] = CRM_JiraSync_JiraApiHelper::findOrCreateContact($user);
   }
 
@@ -207,7 +207,10 @@ function jira_sync_civicrm_oauthsync_jira_get_remote_user_list(&$remoteGroupName
  * Used to sync the members of a remote group
  */
 function jira_sync_civicrm_oauthsync_jira_update_remote_users(&$remoteGroupName, &$toRemove, &$toAdd) {
-  $groups_json = CRM_JiraSync_JiraApiHelper::callJiraApi('/rest/api/3/group/member?groupname=' . $remoteGroupName);
+
+  foreach ($toAdd as $contactId) {
+
+  }
   // TODO: handle the above being an error
 
 }

@@ -138,13 +138,13 @@ class CRM_JiraSync_JiraApiHelper {
    * Call a JIRA api endpoint
    *
    * @param string $path the path after the jira base url
+   *  Ex. /rest/api/3/groups/picker
    * @param bool $get if this is a get request
    * @param bool $post if this is a post request
-   *  Ex. /rest/api/3/groups/picker
-   *
+   * @param array $body the body of the post request
    * @return array | CRM_Core_Error
    */
-  public static function callJiraApi($path, $get = true, $post = false) {
+  public static function callJiraApi($path, $get = true, $post = false, $body = NULL) {
     assert($get != $post);
 
     // build the url
@@ -160,6 +160,10 @@ class CRM_JiraSync_JiraApiHelper {
       CURLOPT_POST => $post,
       CURLOPT_HTTPGET => $get,
     ));
+    if($post) {
+      $encodedBody = json_encode($body);
+      curl_setopt(CURLOPT_POSTFIELDS, $encodedBody);
+    }
     self::oauthHelper()->addAccessToken($ch);
 
     print("<br/>connecting\n\n<br/>");
@@ -241,6 +245,34 @@ class CRM_JiraSync_JiraApiHelper {
     print_r($contact);
 
     return $contactId;
+  }
+
+  /**
+   * Adds the contact to the remote group.
+   * If the contact does not exist in jira this will create it.
+   * If the contact has not been synced before it will add its jira account details
+   * @param $contactId the contact id of the remote contact
+   * @param $remoteGroup the remote group name
+   */
+  public static function addContactToRemoteGroup($contactId, $remoteGroup) {
+    // see if the contact has an atlassian id
+    $params = array(
+      'entityID' => $contactId,
+      'custom_' , self::getJiraUserAccountCustomFieldId() => 1
+    );
+    $atlassian_id = CRM_Core_BAO_CustomValueTable::getValues($params)['custom_' . self::getJiraUserAccountCustomFieldId()];
+
+    if($atlassian_id == null) {
+      // TODO: lookup the contact
+    }
+    $response = self::callJiraApi(
+      '/rest/api/3/group/user?groupname=' .  $remoteGroup,
+      false,
+      true,
+      array(
+        'accountId'=> $atlassian_id
+      )
+    );
   }
 }
 

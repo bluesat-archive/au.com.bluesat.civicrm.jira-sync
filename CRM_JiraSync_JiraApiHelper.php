@@ -205,7 +205,8 @@ class CRM_JiraSync_JiraApiHelper {
    * @return int the contact id
    */
   public static function findOrCreateContact($jiraUserObj) {
-    $contact = CRM_Contact_BAO_Contact::matchContactOnEmail($jiraUserObj['emailAddress']);
+    print "\n<br/>find or create contact<br/>\n";
+    $contact= CRM_Contact_BAO_Contact::matchContactOnEmail($jiraUserObj['emailAddress']);
     if($contact == null) {
       //guess the name based on the split
       $name_words = explode(" ",  $jiraUserObj["name"]);
@@ -215,24 +216,31 @@ class CRM_JiraSync_JiraApiHelper {
         'nick_name' => $jiraUserObj['displayName'],
         'first_name' => $name_words[0],
         'last_name' => $name_words[-1],
-        'email' => $jiraUserObj['email']
+        'email' => $jiraUserObj['emailAddress']
       );
-      $contact = CRM_Contact_BAO_Contact::create(
-        $params
-      );
+      print_r($params);
+      // the api method does magic here
+      // TODO: standardize using/not using the api methods
+      $contact = civicrm_api3('Contact', 'create', $params);
+      print_r($contact);
+      $contactId = $contact["id"];
+    } else {
+      $contactId = $contact->contact_id;
     }
+    print_r(self::getJiraUserAccountCustomFieldId());
     $params = array(
-      'entityID' => $contact->id,
-      self::getJiraUserAccountCustomFieldId() => $jiraUserObj['accountId']
+      'entityID' => $contactId,
+      'custom_' . self::getJiraUserAccountCustomFieldId() => $jiraUserObj['accountId']
     );
     CRM_Core_BAO_CustomValueTable::setValues($params);
     $params = array(
-      'entityID' => $contact->id,
-      self::getJiraEmailAddressCustomFieldId() => $jiraUserObj['email']
+      'entityID' => $contactId,
+      'custom_' . self::getJiraEmailAddressCustomFieldId() => $jiraUserObj['emailAddress']
     );
     CRM_Core_BAO_CustomValueTable::setValues($params);
+    print_r($contact);
 
-    return $contact->id;
+    return $contactId;
   }
 }
 

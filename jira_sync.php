@@ -209,7 +209,7 @@ function jira_sync_civicrm_oauthsync_jira_get_remote_user_list(&$remoteGroupName
 function jira_sync_civicrm_oauthsync_jira_update_remote_users(&$remoteGroupName, &$toRemove, &$toAdd) {
 
   foreach ($toAdd as $contactId) {
-
+    CRM_JiraSync_JiraApiHelper::addContactToRemoteGroup($contactId, $remoteGroupName);
   }
   // TODO: handle the above being an error
 

@@ -162,7 +162,9 @@ class CRM_JiraSync_JiraApiHelper {
     ));
     if($post) {
       $encodedBody = json_encode($body);
-      curl_setopt(CURLOPT_POSTFIELDS, $encodedBody);
+      print("\b<br>");
+      print($encodedBody);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedBody);
     }
     self::oauthHelper()->addAccessToken($ch);
 
@@ -176,7 +178,9 @@ class CRM_JiraSync_JiraApiHelper {
     print curl_getinfo($ch, CURLINFO_HTTP_CODE);
     print("\n\n<br/>");
     if (curl_errno($ch) || curl_getinfo($ch, CURLINFO_HTTP_CODE) != 200) {
-      echo 'Request Error:' . curl_error($ch);
+      print 'Request Error:' . curl_error($ch);
+      print '<br/>\nStatus Code: ' . curl_getinfo($ch, CURLINFO_HTTP_CODE);
+      print_r($ch);
       return CRM_Core_Error::createError("Failed to access jira API");
       // TODO: handle this better
     } else {
@@ -264,15 +268,16 @@ class CRM_JiraSync_JiraApiHelper {
 
     if($atlassian_id == null) {
       // TODO: lookup the contact
+    } else {
+      $response = self::callJiraApi(
+        '/rest/api/3/group/user?groupname=' . $remoteGroup,
+        false,
+        true,
+        array(
+          'accountId' => $atlassian_id
+        )
+      );
     }
-    $response = self::callJiraApi(
-      '/rest/api/3/group/user?groupname=' .  $remoteGroup,
-      false,
-      true,
-      array(
-        'accountId'=> $atlassian_id
-      )
-    );
   }
 }
 

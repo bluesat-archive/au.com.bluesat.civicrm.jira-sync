@@ -177,7 +177,7 @@ class CRM_JiraSync_JiraApiHelper {
     print("\n\n<br/>");
     print curl_getinfo($ch, CURLINFO_HTTP_CODE);
     print("\n\n<br/>");
-    if (curl_errno($ch) || curl_getinfo($ch, CURLINFO_HTTP_CODE) != 200) {
+    if (curl_errno($ch) || curl_getinfo($ch, CURLINFO_HTTP_CODE) >= 300) {
       print 'Request Error:' . curl_error($ch);
       print '<br/>\nStatus Code: ' . curl_getinfo($ch, CURLINFO_HTTP_CODE);
       print_r($ch);
@@ -267,16 +267,43 @@ class CRM_JiraSync_JiraApiHelper {
     $atlassian_id = CRM_Core_BAO_CustomValueTable::getValues($params)['custom_' . self::getJiraUserAccountCustomFieldId()];
 
     if($atlassian_id == null) {
-      // TODO: lookup the contact
+      $contactEmail = CRM_Contact_BAO_Contact::getPrimaryEmail($contactId);
+      // first check if the user exists
+      print("\n<br/>find " . $contactEmail);
+      $atlassian_id = self::findJiraUserByEmail($contactEmail);
+
+      // if they still don't exist invite them
+      if($atlassian_id == null) {
+
+      }
+    }
+    $response = self::callJiraApi(
+      '/rest/api/3/group/user?groupname=' . $remoteGroup,
+      false,
+      true,
+      array(
+        'accountId' => $atlassian_id
+      )
+    );
+  }
+
+  /**
+   * Find a jira user by their email address and return their accountId
+   * @param string $email the email address
+   * @return string|null the user's account id or null if they don't exist
+   */
+  public static function findJiraUserByEmail(&$email) {
+    $response = self::callJiraApi(
+      '/rest/api/3/user/search?query=' . urlencode($email),
+      true,
+      false
+    );
+    if(count($response) > 0) {
+      print("count > 0");
+      print_r($response[0]);
+      return $response[0]["accountId"];
     } else {
-      $response = self::callJiraApi(
-        '/rest/api/3/group/user?groupname=' . $remoteGroup,
-        false,
-        true,
-        array(
-          'accountId' => $atlassian_id
-        )
-      );
+      return null;
     }
   }
 }

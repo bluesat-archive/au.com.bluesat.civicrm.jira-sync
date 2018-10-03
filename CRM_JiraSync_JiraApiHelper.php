@@ -264,25 +264,27 @@ class CRM_JiraSync_JiraApiHelper {
       'entityID' => $contactId,
       'custom_' , self::getJiraUserAccountCustomFieldId() => 1
     );
-    $atlassian_id = CRM_Core_BAO_CustomValueTable::getValues($params)['custom_' . self::getJiraUserAccountCustomFieldId()];
+    $atlassianId = CRM_Core_BAO_CustomValueTable::getValues($params)['custom_' . self::getJiraUserAccountCustomFieldId()];
 
-    if($atlassian_id == null) {
+    if($atlassianId == null) {
       $contactEmail = CRM_Contact_BAO_Contact::getPrimaryEmail($contactId);
       // first check if the user exists
       print("\n<br/>find " . $contactEmail);
-      $atlassian_id = self::findJiraUserByEmail($contactEmail);
+      $atlassianId = self::findJiraUserByEmail($contactEmail);
 
       // if they still don't exist invite them
-      if($atlassian_id == null) {
-
+      if($atlassianId == null) {
+        $atlassianId = self::createJiraUser($contactId);
       }
+
+      // TODO: set atlassian fields
     }
     $response = self::callJiraApi(
       '/rest/api/3/group/user?groupname=' . $remoteGroup,
       false,
       true,
       array(
-        'accountId' => $atlassian_id
+        'accountId' => $atlassianId
       )
     );
   }
@@ -305,6 +307,30 @@ class CRM_JiraSync_JiraApiHelper {
     } else {
       return null;
     }
+  }
+
+  /**
+   * Creates a new jira user
+   *
+   * @param $contactId the contact id of the user to create
+   * @return string the user's account id
+   */
+  public static function createJiraUser(&$contactId) {
+    $contactDetails = CRM_Contact_BAO_Contact::getContactDetails($contactId);
+
+    $response = self::callJiraApi(
+      '/rest/api/3/user',
+      false,
+      true,
+      array(
+        "emailAddress"=> $contactDetails[1],
+        "displayName" => $contactDetails[0],
+        "name" => $contactDetails[1],
+        "notification"=>true
+      )
+    );
+
+    return $response["accountId"];
   }
 }
 

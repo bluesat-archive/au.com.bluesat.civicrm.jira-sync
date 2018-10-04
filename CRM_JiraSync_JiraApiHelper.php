@@ -139,13 +139,11 @@ class CRM_JiraSync_JiraApiHelper {
    *
    * @param string $path the path after the jira base url
    *  Ex. /rest/api/3/groups/picker
-   * @param bool $get if this is a get request
-   * @param bool $post if this is a post request
+   * @param string $method the http method to use
    * @param array $body the body of the post request
    * @return array | CRM_Core_Error
    */
-  public static function callJiraApi($path, $get = true, $post = false, $body = NULL) {
-    assert($get != $post);
+  public static function callJiraApi($path, $method = "GET", $body = NULL) {
 
     // build the url
     $url = self::JIRA_REST_API_BASE .
@@ -157,10 +155,9 @@ class CRM_JiraSync_JiraApiHelper {
     $ch = curl_init($url);
     curl_setopt_array($ch, array(
       CURLOPT_RETURNTRANSFER => TRUE,
-      CURLOPT_POST => $post,
-      CURLOPT_HTTPGET => $get,
+      CURLOPT_CUSTOMREQUEST => $method
     ));
-    if($post) {
+    if($body != NULL) {
       $encodedBody = json_encode($body);
       print("\b<br>");
       print($encodedBody);
@@ -238,11 +235,7 @@ class CRM_JiraSync_JiraApiHelper {
     print_r(self::getJiraUserAccountCustomFieldId());
     $params = array(
       'entityID' => $contactId,
-      'custom_' . self::getJiraUserAccountCustomFieldId() => $jiraUserObj['accountId']
-    );
-    CRM_Core_BAO_CustomValueTable::setValues($params);
-    $params = array(
-      'entityID' => $contactId,
+      'custom_' . self::getJiraUserAccountCustomFieldId() => $jiraUserObj['accountId'],
       'custom_' . self::getJiraEmailAddressCustomFieldId() => $jiraUserObj['emailAddress']
     );
     CRM_Core_BAO_CustomValueTable::setValues($params);
@@ -278,15 +271,37 @@ class CRM_JiraSync_JiraApiHelper {
       }
 
       // TODO: set atlassian fields
+      print_r(self::getJiraUserAccountCustomFieldId());
+      $params = array(
+        'entityID' => $contactId,
+        'custom_' . self::getJiraUserAccountCustomFieldId() => $atlassianId
+      );
+      CRM_Core_BAO_CustomValueTable::setValues($params);
     }
     $response = self::callJiraApi(
-      '/rest/api/3/group/user?groupname=' . $remoteGroup,
-      false,
-      true,
-      array(
+      '/rest/api/3/group/user?groupname=' . $remoteGroup, "POST", array(
         'accountId' => $atlassianId
       )
     );
+  }
+
+  /**
+   * Removes a given contact from a remote group if they have an atlassianId stored
+   * @param int $contactId the contact to remove
+   * @param string $remoteGroup the remote group to remove them from
+   */
+  public static function removeContactFromRemoteGroup(&$contactId, $remoteGroup) {
+    // see if the contact has an atlassian id
+    $params = array(
+      'entityID' => $contactId,
+      'custom_' , self::getJiraUserAccountCustomFieldId() => 1
+    );
+    $atlassianId = CRM_Core_BAO_CustomValueTable::getValues($params)['custom_' . self::getJiraUserAccountCustomFieldId()];
+    if($atlassianId != null) {
+      $response = self::callJiraApi(
+        '/rest/api/3/group/user?groupname=' . $remoteGroup . '&accountid=' . $atlassianId, "DELETE"
+      );
+    }
   }
 
   /**
@@ -296,9 +311,7 @@ class CRM_JiraSync_JiraApiHelper {
    */
   public static function findJiraUserByEmail(&$email) {
     $response = self::callJiraApi(
-      '/rest/api/3/user/search?query=' . urlencode($email),
-      true,
-      false
+      '/rest/api/3/user/search?query=' . urlencode($email), "GET"
     );
     if(count($response) > 0) {
       print("count > 0");
@@ -319,14 +332,11 @@ class CRM_JiraSync_JiraApiHelper {
     $contactDetails = CRM_Contact_BAO_Contact::getContactDetails($contactId);
 
     $response = self::callJiraApi(
-      '/rest/api/3/user',
-      false,
-      true,
-      array(
-        "emailAddress"=> $contactDetails[1],
+      '/rest/api/3/user', "POST", array(
+        "emailAddress" => $contactDetails[1],
         "displayName" => $contactDetails[0],
         "name" => $contactDetails[1],
-        "notification"=>true
+        "notification" => true
       )
     );
 

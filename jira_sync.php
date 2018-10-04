@@ -173,7 +173,7 @@ function jira_sync_civicrm_oauthsync_consent_success(&$prefix) {
  * Used to get the connection id
  */
 function jira_sync_civicrm_oauthsync_jira_sync_groups_list(&$groups) {
-  $groups_json = CRM_JiraSync_JiraApiHelper::callJiraApi('/rest/api/3/groups/picker');
+  $groups_json = CRM_JiraSync_JiraApiHelper::callJiraApi('/rest/api/3/groups/picker', "GET");
   print_r($groups_json);
   print "\n<br/>";
   foreach ($groups_json['groups'] as $group) {
@@ -188,7 +188,7 @@ function jira_sync_civicrm_oauthsync_jira_sync_groups_list(&$groups) {
  * Used to sync the members of a remote group
  */
 function jira_sync_civicrm_oauthsync_jira_get_remote_user_list(&$remoteGroupName, &$members) {
-  $groupsJson = CRM_JiraSync_JiraApiHelper::callJiraApi('/rest/api/3/group/member?groupname=' . $remoteGroupName);
+  $groupsJson = CRM_JiraSync_JiraApiHelper::callJiraApi('/rest/api/3/group/member?groupname=' . $remoteGroupName, "GET");
   // TODO: handle the above being an error
 
   print_r($groupsJson);
@@ -213,6 +213,9 @@ function jira_sync_civicrm_oauthsync_jira_update_remote_users(&$remoteGroupName,
   }
   // TODO: handle the above being an error
 
+  foreach($toRemove as $contactId) {
+    CRM_JiraSync_JiraApiHelper::removeContactFromRemoteGroup($contactId, $remoteGroupName);
+  }
 }
 
 /**

@@ -163,6 +163,7 @@ class CRM_JiraSync_JiraApiHelper {
       print($encodedBody);
       curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedBody);
     }
+    print "\n\ncall " . $path;
     self::oauthHelper()->addAccessToken($ch);
 
     print("<br/>connecting\n\n<br/>");
@@ -178,6 +179,7 @@ class CRM_JiraSync_JiraApiHelper {
       print 'Request Error:' . curl_error($ch);
       print '<br/>\nStatus Code: ' . curl_getinfo($ch, CURLINFO_HTTP_CODE);
       print_r($ch);
+      throw new CRM_Extension_Exception("JIRA API Request Failed");
       return CRM_Core_Error::createError("Failed to access jira API");
       // TODO: handle this better
     } else {

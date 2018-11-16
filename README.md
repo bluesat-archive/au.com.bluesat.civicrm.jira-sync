@@ -1,4 +1,4 @@
-# com.hjed.civicrm.jira-sync
+# au.com.bluesat.civicrm.jira-sync
 
 This extension will provide two way sync of groups between CiviCRM and JIRA Cloud. 
 
@@ -24,7 +24,7 @@ install it with the command-line tool [cv](https://github.com/civicrm/cv).
 
 ```bash
 cd <extension-dir>
-cv dl com.hjed.civicrm.jira-sync@https://github.com/FIXME/com.hjed.civicrm.jira-sync/archive/master.zip
+cv dl au.com.bluesat.civicrm.jira-sync@https://github.com/FIXME/au.com.bluesat.civicrm.jira-sync/archive/master.zip
 ```
 
 ## Installation (CLI, Git)
@@ -33,7 +33,7 @@ Sysadmins and developers may clone the [Git](https://en.wikipedia.org/wiki/Git) 
 install it with the command-line tool [cv](https://github.com/civicrm/cv).
 
 ```bash
-git clone https://github.com/FIXME/com.hjed.civicrm.jira-sync.git
+git clone https://github.com/FIXME/au.com.bluesat.civicrm.jira-sync.git
 cv en jira_sync
 ```
 

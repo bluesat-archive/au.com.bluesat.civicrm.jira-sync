@@ -46,7 +46,7 @@ class CRM_JiraSync_Upgrader_Base {
     if (!self::$instance) {
       // FIXME auto-generate
       self::$instance = new CRM_JiraSync_Upgrader(
-        'com.hjed.civicrm.jira-sync',
+        'au.com.bluesat.civicrm.jira-sync',
         realpath(__DIR__ . '/../../../')
       );
     }

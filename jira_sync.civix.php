@@ -8,7 +8,7 @@
  */
 class CRM_JiraSync_ExtensionUtil {
   const SHORT_NAME = "jira_sync";
-  const LONG_NAME = "com.hjed.civicrm.jira-sync";
+  const LONG_NAME = "au.com.bluesat.civicrm.jira-sync";
   const CLASS_PREFIX = "CRM_JiraSync";
 
   /**

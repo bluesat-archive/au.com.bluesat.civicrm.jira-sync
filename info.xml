@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
-<extension key="com.hjed.civicrm.jira-sync" type="module">
+<extension key="au.com.bluesat.civicrm.jira-sync" type="module">
   <file>jira_sync</file>
   <name>JIRA Group Sync</name>
   <description>This plugin provides basic sync capabilities between civicrm and jira</description>
   <license>AGPL-3.0</license>
   <maintainer>
-    <author>Harry J.E Day</author>
-    <email>harry@dayfamilyweb.com</email>
+    <author>BLUEsat UNSW</author>
+    <email>info@bluesat.com.au</email>
   </maintainer>
   <urls>
     <url desc="Main Extension Page">http://FIXME</url>
